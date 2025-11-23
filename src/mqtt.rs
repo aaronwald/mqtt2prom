@@ -119,7 +119,6 @@ pub async fn run(config: Config, metrics: Arc<ShellyMetrics>) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_topic_filtering() {

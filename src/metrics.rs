@@ -153,6 +153,7 @@ impl ShellyMetrics {
         }
     }
 
+    #[allow(dead_code)]
     pub fn update_power(&self, device: &str, switch: &str, watts: f64) {
         let labels = DeviceLabels {
             device: device.to_string(),

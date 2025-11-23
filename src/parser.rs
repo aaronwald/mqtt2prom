@@ -10,6 +10,7 @@ pub enum ParserError {
     IgnoredMessage(String),
 
     #[error("Missing required field: {0}")]
+    #[allow(dead_code)]
     MissingField(String),
 }
 
@@ -108,6 +109,7 @@ pub fn extract_device_id(src: &str) -> String {
 }
 
 /// Check if a message should be processed based on method type
+#[allow(dead_code)]
 pub fn should_process(method: &MessageMethod) -> bool {
     !matches!(method, MessageMethod::NotifyEvent)
 }
