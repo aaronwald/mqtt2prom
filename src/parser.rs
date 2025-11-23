@@ -15,6 +15,7 @@ pub enum ParserError {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
+#[allow(clippy::enum_variant_names)]
 pub enum MessageMethod {
     NotifyFullStatus,
     NotifyStatus,
