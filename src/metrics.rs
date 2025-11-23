@@ -1,8 +1,7 @@
-use prometheus_client::encoding::{EncodeLabelSet, EncodeLabelValue};
+use prometheus_client::encoding::EncodeLabelSet;
 use prometheus_client::metrics::family::Family;
 use prometheus_client::metrics::gauge::Gauge;
 use prometheus_client::registry::Registry;
-use std::sync::Arc;
 
 use crate::parser::{extract_device_id, ShellyMessage};
 
