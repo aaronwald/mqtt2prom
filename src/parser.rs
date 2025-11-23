@@ -53,7 +53,8 @@ pub struct SwitchData {
     pub voltage: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub current: Option<f64>,
-    pub aenergy: EnergyData,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub aenergy: Option<EnergyData>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub temperature: Option<TemperatureData>,
 }
@@ -156,7 +157,7 @@ mod tests {
         assert_eq!(switch.apower, Some(125.5));
         assert_eq!(switch.voltage, Some(122.3));
         assert_eq!(switch.current, Some(1.025));
-        assert_eq!(switch.aenergy.total, 3949.949);
+        assert_eq!(switch.aenergy.as_ref().unwrap().total, 3949.949);
 
         let temp = switch.temperature.as_ref().unwrap();
         assert_eq!(temp.tc, 37.9);
@@ -187,8 +188,9 @@ mod tests {
 
         assert_eq!(msg.method, MessageMethod::NotifyStatus);
         let switch = msg.params.switch.as_ref().unwrap();
-        assert_eq!(switch.aenergy.total, 3949.949);
-        assert_eq!(switch.aenergy.by_minute, Some(vec![0.0, 0.0, 0.0]));
+        let aenergy = switch.aenergy.as_ref().unwrap();
+        assert_eq!(aenergy.total, 3949.949);
+        assert_eq!(aenergy.by_minute, Some(vec![0.0, 0.0, 0.0]));
     }
 
     #[test]

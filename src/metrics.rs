@@ -119,10 +119,12 @@ impl ShellyMetrics {
                     .set((current * 1000.0) as i64);
             }
 
-            // Always update energy total
-            self.energy_total
-                .get_or_create(&labels)
-                .set((switch.aenergy.total * 10.0) as i64);
+            // Update energy total if present
+            if let Some(aenergy) = &switch.aenergy {
+                self.energy_total
+                    .get_or_create(&labels)
+                    .set((aenergy.total * 10.0) as i64);
+            }
 
             // Update switch state if present
             if let Some(output) = switch.output {
