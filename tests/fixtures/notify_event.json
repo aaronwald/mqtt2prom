@@ -1,0 +1,16 @@
+{
+  "src": "shellyplugus-d48afc781ad8",
+  "dst": "mostert/shelly/events",
+  "method": "NotifyEvent",
+  "params": {
+    "ts": 1763918619.8,
+    "events": [
+      {
+        "component": "sys",
+        "event": "scheduled_restart",
+        "time_ms": 996,
+        "ts": 1763918619.8
+      }
+    ]
+  }
+}

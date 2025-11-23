@@ -1,0 +1,50 @@
+[package]
+name = "mqtt2prom"
+version = "0.1.0"
+edition = "2021"
+authors = ["varshtat"]
+description = "MQTT to Prometheus exporter for Shelly IoT devices"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# MQTT client
+rumqttc = "0.24"
+
+# Prometheus metrics
+prometheus-client = "0.22"
+
+# HTTP server
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace"] }
+hyper = { version = "1", features = ["full"] }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# JSON parsing
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+anyhow = "1"
+thiserror = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Configuration
+clap = { version = "4", features = ["derive", "env"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+proptest = "1.4"
+wiremock = "0.6"
+assert_matches = "1.5"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
