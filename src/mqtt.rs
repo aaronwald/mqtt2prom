@@ -15,11 +15,8 @@ pub struct MqttHandler {
 
 impl MqttHandler {
     pub fn new(config: &Config, metrics: Arc<ShellyMetrics>) -> Result<(Self, rumqttc::EventLoop)> {
-        let mut mqttoptions = MqttOptions::new(
-            &config.mqtt_client_id,
-            &config.mqtt_host,
-            config.mqtt_port,
-        );
+        let mut mqttoptions =
+            MqttOptions::new(&config.mqtt_client_id, &config.mqtt_host, config.mqtt_port);
 
         mqttoptions.set_credentials(&config.mqtt_username, &config.mqtt_password);
         mqttoptions.set_keep_alive(Duration::from_secs(30));
@@ -64,10 +61,7 @@ impl MqttHandler {
                     return;
                 }
 
-                info!(
-                    "Processing {:?} from device: {}",
-                    msg.method, msg.src
-                );
+                info!("Processing {:?} from device: {}", msg.method, msg.src);
                 self.metrics.update_from_message(&msg);
             }
             Err(e) => {

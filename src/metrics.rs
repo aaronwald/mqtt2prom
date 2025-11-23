@@ -108,7 +108,9 @@ impl ShellyMetrics {
 
             // Update voltage if present
             if let Some(voltage) = switch.voltage {
-                self.voltage.get_or_create(&labels).set((voltage * 10.0) as i64);
+                self.voltage
+                    .get_or_create(&labels)
+                    .set((voltage * 10.0) as i64);
             }
 
             // Update current if present

@@ -200,7 +200,10 @@ mod tests {
 
         let result = parse_message(json);
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ParserError::IgnoredMessage(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            ParserError::IgnoredMessage(_)
+        ));
     }
 
     #[test]
@@ -210,16 +213,10 @@ mod tests {
             "d48afc781ad8"
         );
 
-        assert_eq!(
-            extract_device_id("shellyht-abc123"),
-            "abc123"
-        );
+        assert_eq!(extract_device_id("shellyht-abc123"), "abc123");
 
         // Edge case: no dash
-        assert_eq!(
-            extract_device_id("nodash"),
-            "nodash"
-        );
+        assert_eq!(extract_device_id("nodash"), "nodash");
     }
 
     #[test]
