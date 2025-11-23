@@ -162,6 +162,7 @@ impl ShellyMetrics {
         self.power.get_or_create(&labels).set(watts as i64);
     }
 
+    #[allow(dead_code)]
     pub fn update_voltage(&self, device: &str, switch: &str, volts: f64) {
         let labels = DeviceLabels {
             device: device.to_string(),
@@ -172,6 +173,7 @@ impl ShellyMetrics {
             .set((volts * 10.0) as i64);
     }
 
+    #[allow(dead_code)]
     pub fn update_current(&self, device: &str, switch: &str, amps: f64) {
         let labels = DeviceLabels {
             device: device.to_string(),
@@ -182,6 +184,7 @@ impl ShellyMetrics {
             .set((amps * 1000.0) as i64);
     }
 
+    #[allow(dead_code)]
     pub fn update_energy(&self, device: &str, switch: &str, wh: f64) {
         let labels = DeviceLabels {
             device: device.to_string(),
