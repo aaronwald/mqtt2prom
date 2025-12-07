@@ -44,6 +44,8 @@ pub struct MessageParams {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SwitchData {
+    /// Switch ID - optional for Gen4 devices
+    #[serde(default)]
     pub id: u8,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub output: Option<bool>,
