@@ -62,7 +62,7 @@ impl MqttHandler {
                 }
 
                 info!("Processing {:?} from device: {}", msg.method, msg.src);
-                self.metrics.update_from_message(&msg);
+                self.metrics.update_from_message(&msg, Some(topic));
             }
             Err(e) => {
                 warn!("Failed to parse message: {}", e);

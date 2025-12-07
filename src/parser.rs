@@ -109,6 +109,18 @@ pub fn extract_device_id(src: &str) -> String {
     }
 }
 
+/// Extract device name from MQTT topic path
+/// Example: "mostert/shelly/plugcoffee/events/rpc" -> Some("plugcoffee")
+pub fn extract_device_from_topic(topic: &str) -> Option<String> {
+    let parts: Vec<&str> = topic.split('/').collect();
+    // Expected format: <prefix>/shelly/<device-name>/events/rpc
+    if parts.len() >= 3 {
+        Some(parts[2].to_string())
+    } else {
+        None
+    }
+}
+
 /// Check if a message should be processed based on method type
 #[allow(dead_code)]
 pub fn should_process(method: &MessageMethod) -> bool {
@@ -236,5 +248,27 @@ mod tests {
         let json = r#"{"invalid": "json"}"#;
         let result = parse_message(json);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_extract_device_from_topic() {
+        assert_eq!(
+            extract_device_from_topic("mostert/shelly/plugcoffee/events/rpc"),
+            Some("plugcoffee".to_string())
+        );
+
+        assert_eq!(
+            extract_device_from_topic("mostert/shelly/plugfreezer/events/rpc"),
+            Some("plugfreezer".to_string())
+        );
+
+        // Edge case: short topic
+        assert_eq!(extract_device_from_topic("a/b"), None);
+
+        // Edge case: exactly 3 parts
+        assert_eq!(
+            extract_device_from_topic("a/b/device"),
+            Some("device".to_string())
+        );
     }
 }

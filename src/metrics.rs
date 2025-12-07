@@ -3,7 +3,7 @@ use prometheus_client::metrics::family::Family;
 use prometheus_client::metrics::gauge::Gauge;
 use prometheus_client::registry::Registry;
 
-use crate::parser::{extract_device_id, ShellyMessage};
+use crate::parser::{extract_device_from_topic, extract_device_id, ShellyMessage};
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, EncodeLabelSet)]
 pub struct DeviceLabels {
@@ -89,8 +89,11 @@ impl ShellyMetrics {
         }
     }
 
-    pub fn update_from_message(&self, msg: &ShellyMessage) {
-        let device_id = extract_device_id(&msg.src);
+    pub fn update_from_message(&self, msg: &ShellyMessage, topic: Option<&str>) {
+        // Use topic-derived device name if available, otherwise fall back to MAC
+        let device_id = topic
+            .and_then(extract_device_from_topic)
+            .unwrap_or_else(|| extract_device_id(&msg.src));
 
         if let Some(switch) = &msg.params.switch {
             let switch_id = switch.id.to_string();
@@ -261,12 +264,13 @@ mod tests {
         }"#;
 
         let msg = parse_message(json).unwrap();
-        metrics.update_from_message(&msg);
+        metrics.update_from_message(&msg, Some("mostert/shelly/plugcoffee/events/rpc"));
 
         let mut buffer = String::new();
         encode(&mut buffer, &registry).unwrap();
 
-        assert!(buffer.contains("d48afc781ad8"));
+        // Should use topic-derived name "plugcoffee" instead of MAC
+        assert!(buffer.contains("plugcoffee"));
         assert!(buffer.contains("switch=\"0\""));
     }
 
