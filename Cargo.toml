@@ -1,6 +1,6 @@
 [package]
 name = "mqtt2prom"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["varshtat"]
 description = "MQTT to Prometheus exporter for Shelly IoT devices"

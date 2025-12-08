@@ -36,6 +36,12 @@ pub struct ShellyMessage {
 pub struct MessageParams {
     #[serde(rename = "switch:0", skip_serializing_if = "Option::is_none")]
     pub switch: Option<SwitchData>,
+    #[serde(rename = "temperature:0", skip_serializing_if = "Option::is_none")]
+    pub temperature: Option<TemperatureSensorData>,
+    #[serde(rename = "humidity:0", skip_serializing_if = "Option::is_none")]
+    pub humidity: Option<HumiditySensorData>,
+    #[serde(rename = "devicepower:0", skip_serializing_if = "Option::is_none")]
+    pub devicepower: Option<DevicePowerData>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub wifi: Option<WifiData>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -87,6 +93,48 @@ pub struct WifiData {
 pub struct SysData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub uptime: Option<i64>,
+}
+
+/// Temperature sensor data from H&T devices (temperature:0)
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct TemperatureSensorData {
+    #[serde(default)]
+    pub id: u8,
+    #[serde(rename = "tC")]
+    pub tc: f64,
+    #[serde(rename = "tF")]
+    pub tf: f64,
+}
+
+/// Humidity sensor data from H&T devices (humidity:0)
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct HumiditySensorData {
+    #[serde(default)]
+    pub id: u8,
+    pub rh: f64,
+}
+
+/// Device power/battery data (devicepower:0)
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DevicePowerData {
+    #[serde(default)]
+    pub id: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub battery: Option<BatteryData>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external: Option<ExternalPowerData>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct BatteryData {
+    #[serde(rename = "V")]
+    pub voltage: f64,
+    pub percent: f64,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ExternalPowerData {
+    pub present: bool,
 }
 
 /// Parse a Shelly MQTT message from JSON

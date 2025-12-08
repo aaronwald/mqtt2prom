@@ -23,6 +23,9 @@ pub struct ShellyMetrics {
     energy_total: Family<DeviceLabels, Gauge>,
     switch_state: Family<DeviceLabels, Gauge>,
     temperature: Family<DeviceOnlyLabels, Gauge>,
+    humidity: Family<DeviceOnlyLabels, Gauge>,
+    battery_percent: Family<DeviceOnlyLabels, Gauge>,
+    battery_voltage: Family<DeviceOnlyLabels, Gauge>,
     wifi_rssi: Family<DeviceOnlyLabels, Gauge>,
 }
 
@@ -34,6 +37,9 @@ impl ShellyMetrics {
         let energy_total = Family::<DeviceLabels, Gauge>::default();
         let switch_state = Family::<DeviceLabels, Gauge>::default();
         let temperature = Family::<DeviceOnlyLabels, Gauge>::default();
+        let humidity = Family::<DeviceOnlyLabels, Gauge>::default();
+        let battery_percent = Family::<DeviceOnlyLabels, Gauge>::default();
+        let battery_voltage = Family::<DeviceOnlyLabels, Gauge>::default();
         let wifi_rssi = Family::<DeviceOnlyLabels, Gauge>::default();
 
         registry.register(
@@ -73,6 +79,24 @@ impl ShellyMetrics {
         );
 
         registry.register(
+            "shelly_humidity_percent",
+            "Relative humidity percentage",
+            humidity.clone(),
+        );
+
+        registry.register(
+            "shelly_battery_percent",
+            "Battery charge percentage",
+            battery_percent.clone(),
+        );
+
+        registry.register(
+            "shelly_battery_voltage",
+            "Battery voltage in volts",
+            battery_voltage.clone(),
+        );
+
+        registry.register(
             "shelly_wifi_rssi_dbm",
             "WiFi signal strength in dBm",
             wifi_rssi.clone(),
@@ -85,6 +109,9 @@ impl ShellyMetrics {
             energy_total,
             switch_state,
             temperature,
+            humidity,
+            battery_percent,
+            battery_voltage,
             wifi_rssi,
         }
     }
@@ -144,6 +171,41 @@ impl ShellyMetrics {
                 self.temperature
                     .get_or_create(&device_labels)
                     .set((temp.tc * 10.0) as i64);
+            }
+        }
+
+        // Update temperature from H&T sensor (temperature:0)
+        if let Some(temp) = &msg.params.temperature {
+            let device_labels = DeviceOnlyLabels {
+                device: device_id.clone(),
+            };
+            self.temperature
+                .get_or_create(&device_labels)
+                .set((temp.tc * 10.0) as i64);
+        }
+
+        // Update humidity from H&T sensor (humidity:0)
+        if let Some(humidity) = &msg.params.humidity {
+            let device_labels = DeviceOnlyLabels {
+                device: device_id.clone(),
+            };
+            self.humidity
+                .get_or_create(&device_labels)
+                .set((humidity.rh * 10.0) as i64);
+        }
+
+        // Update battery from device power (devicepower:0)
+        if let Some(devicepower) = &msg.params.devicepower {
+            if let Some(battery) = &devicepower.battery {
+                let device_labels = DeviceOnlyLabels {
+                    device: device_id.clone(),
+                };
+                self.battery_percent
+                    .get_or_create(&device_labels)
+                    .set(battery.percent as i64);
+                self.battery_voltage
+                    .get_or_create(&device_labels)
+                    .set((battery.voltage * 100.0) as i64);
             }
         }
 
@@ -221,6 +283,9 @@ mod tests {
         assert!(buffer.contains("shelly_switch_energy_total_wh"));
         assert!(buffer.contains("shelly_switch_state"));
         assert!(buffer.contains("shelly_temperature_celsius"));
+        assert!(buffer.contains("shelly_humidity_percent"));
+        assert!(buffer.contains("shelly_battery_percent"));
+        assert!(buffer.contains("shelly_battery_voltage"));
         assert!(buffer.contains("shelly_wifi_rssi_dbm"));
     }
 
@@ -287,5 +352,42 @@ mod tests {
 
         assert!(buffer.contains("device1"));
         assert!(buffer.contains("device2"));
+    }
+
+    #[test]
+    fn test_ht_sensor_message() {
+        let mut registry = Registry::default();
+        let metrics = ShellyMetrics::new(&mut registry);
+
+        let json = r#"{
+            "src": "shellyhtg3-3030f9e7d294",
+            "dst": "mostert/shelly/temp-main/events",
+            "method": "NotifyFullStatus",
+            "params": {
+                "temperature:0": {"id": 0, "tC": 18.0, "tF": 64.5},
+                "humidity:0": {"id": 0, "rh": 38.9},
+                "devicepower:0": {
+                    "id": 0,
+                    "battery": {"V": 5.41, "percent": 70},
+                    "external": {"present": false}
+                },
+                "wifi": {"rssi": -54}
+            }
+        }"#;
+
+        let msg = parse_message(json).unwrap();
+        metrics.update_from_message(&msg, Some("mostert/shelly/temp-main/events/rpc"));
+
+        let mut buffer = String::new();
+        encode(&mut buffer, &registry).unwrap();
+
+        // Check temperature (18.0 * 10 = 180)
+        assert!(buffer.contains("temp-main"));
+        assert!(buffer.contains("shelly_temperature_celsius"));
+        // Check humidity (38.9 * 10 = 389)
+        assert!(buffer.contains("shelly_humidity_percent"));
+        // Check battery
+        assert!(buffer.contains("shelly_battery_percent"));
+        assert!(buffer.contains("shelly_battery_voltage"));
     }
 }
