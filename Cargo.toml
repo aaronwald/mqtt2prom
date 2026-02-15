@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 # MQTT client
-rumqttc = "0.24"
+rumqttc = "0.25"
 
 # Prometheus metrics
 prometheus-client = "0.22"
